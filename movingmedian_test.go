@@ -1,4 +1,4 @@
-package main
+package movingmedian
 
 import (
 	"github.com/wangjohn/quickselect"
