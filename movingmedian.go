@@ -70,7 +70,7 @@ func (m *MovingMedian) Push(v float64) {
 	if m.nelts >= len(m.queue) {
 		old := &m.queue[m.idx]
 
-		if old.f >= m.minHeap.float64Heap[0].f {
+		if old.f > m.minHeap.float64Heap[0].f {
 			heap.Remove(&m.minHeap, old.idx)
 		} else {
 			heap.Remove(&m.maxHeap, old.idx)
