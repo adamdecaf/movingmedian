@@ -5,11 +5,6 @@ import (
 	"math"
 )
 
-type HeapInterface interface {
-	heap.Interface
-	RemoveValue(float64) bool
-}
-
 type Heap []float64
 
 func (h Heap) Len() int { return len(h) }
