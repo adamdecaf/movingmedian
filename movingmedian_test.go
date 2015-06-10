@@ -26,10 +26,14 @@ func BenchmarkMovingMedianOptimized(b *testing.B) {
 	var windowSize = int(4e2)
 	data := getData(int(16e4))
 
-	m := NewMovingMedian(windowSize)
-	for _, v := range data {
-		m.Push(v)
-		m.Median()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		m := NewMovingMedian(windowSize)
+		for _, v := range data {
+			m.Push(v)
+			m.Median()
+		}
 	}
 }
 
@@ -37,9 +41,12 @@ func BenchmarkMovingMedian(b *testing.B) {
 	var windowSize = int(4e2)
 	data := getData(int(16e4))
 
-	for i := range data {
-		want := median(data, i, windowSize)
-		want = want
+	b.ResetTimer()
+
+	for j := 0; j < b.N; j++ {
+		for i := range data {
+			median(data, i, windowSize)
+		}
 	}
 }
 
