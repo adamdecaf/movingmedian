@@ -32,10 +32,16 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 			[]float64{1, 2, 3, 4, 6, 8},
 		},
 		{
-			"SameNumberInBothHeaps",
+			"SameNumberInBothHeaps3Times",
 			4,
 			[]float64{11, 13, 13, 13, 25, 27, 29, 31},
 			[]float64{11, 12, 13, 13, 13, 19, 26, 28},
+		},
+		{
+			"SameNumberInBothHeaps4Times",
+			4,
+			[]float64{11, 13, 13, 13, 13, 25, 27, 29, 31},
+			[]float64{11, 12, 13, 13, 13, 13, 19, 26, 28},
 		},
 	}
 
@@ -45,7 +51,16 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 			m.Push(v)
 			actual := m.Median()
 			if test.want[i] != actual {
-				t.Errorf("failed on test %s index %d the median of %f is %f and not %f", test.name, i, test.data[1+i-test.windowSize:1+i], test.want[i], actual)
+				firstElement := 1 + i - test.windowSize
+				if firstElement < 0 {
+					firstElement = 0
+				}
+				t.Errorf("failed on test %s index %d the median of %f is %f and not %f",
+					test.name,
+					i,
+					test.data[firstElement:1+i],
+					test.want[i],
+					actual)
 			}
 		}
 	}
