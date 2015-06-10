@@ -47,7 +47,7 @@ func getData(rangeSize int) []float64 {
 	var data = make([]float64, rangeSize)
 	var r = rand.New(rand.NewSource(99))
 	for i, _ := range data {
-		data[i] = float64(int(10 * r.Float64()))
+		data[i] = r.Float64()
 	}
 
 	return data
