@@ -89,7 +89,9 @@ func (m *MovingMedian) Push(v float64) {
 	if len(m.queue) > m.size {
 		outItem := m.queue[0]
 		m.queue = m.queue[1:len(m.queue)]
-		if !removeFromHeap(&m.minHeap, outItem) {
+		if outItem >= m.minHeap.float64Heap[0] {
+			removeFromHeap(&m.minHeap, outItem)
+		} else {
 			removeFromHeap(&m.maxHeap, outItem)
 		}
 	}
