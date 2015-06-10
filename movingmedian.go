@@ -5,23 +5,23 @@ import (
 	"math"
 )
 
-type HeapInterface interface {
+type float64HeapInterface interface {
 	heap.Interface
 	Data() []float64
 }
 
-type Heap []float64
+type float64Heap []float64
 
-func (h Heap) Len() int { return len(h) }
-func (h Heap) Swap(i, j int) {
+func (h float64Heap) Len() int { return len(h) }
+func (h float64Heap) Swap(i, j int) {
 	h[i], h[j] = h[j], h[i]
 }
 
-func (h *Heap) Push(x interface{}) {
+func (h *float64Heap) Push(x interface{}) {
 	*h = append(*h, x.(float64))
 }
 
-func (h *Heap) Pop() interface{} {
+func (h *float64Heap) Pop() interface{} {
 	old := *h
 	n := len(old)
 	x := old[n-1]
@@ -29,11 +29,11 @@ func (h *Heap) Pop() interface{} {
 	return x
 }
 
-func (h Heap) Data() []float64 {
+func (h float64Heap) Data() []float64 {
 	return []float64(h)
 }
 
-func RemoveFromHeap(h HeapInterface, x float64) bool {
+func removeFromHeap(h float64HeapInterface, x float64) bool {
 	for i, v := range h.Data() {
 		if v == x {
 			heap.Remove(h, i)
@@ -44,31 +44,31 @@ func RemoveFromHeap(h HeapInterface, x float64) bool {
 	return false
 }
 
-type MinHeap struct {
-	Heap
+type minFloat64Heap struct {
+	float64Heap
 }
 
-func (h MinHeap) Less(i, j int) bool { return h.Heap[i] < h.Heap[j] }
+func (h minFloat64Heap) Less(i, j int) bool { return h.float64Heap[i] < h.float64Heap[j] }
 
-type MaxHeap struct {
-	Heap
+type maxFloat64Heap struct {
+	float64Heap
 }
 
-func (h MaxHeap) Less(i, j int) bool { return h.Heap[i] > h.Heap[j] }
+func (h maxFloat64Heap) Less(i, j int) bool { return h.float64Heap[i] > h.float64Heap[j] }
 
 type MovingMedian struct {
 	size    int
 	queue   []float64
-	maxHeap MaxHeap
-	minHeap MinHeap
+	maxHeap maxFloat64Heap
+	minHeap minFloat64Heap
 }
 
 func NewMovingMedian(size int) MovingMedian {
 	m := MovingMedian{
 		size:    size,
 		queue:   make([]float64, 0),
-		maxHeap: MaxHeap{},
-		minHeap: MinHeap{},
+		maxHeap: maxFloat64Heap{},
+		minHeap: minFloat64Heap{},
 	}
 
 	heap.Init(&m.maxHeap)
@@ -80,7 +80,7 @@ func (m *MovingMedian) Push(v float64) {
 	m.queue = append(m.queue, v)
 
 	if m.minHeap.Len() == 0 ||
-		v > m.minHeap.Heap[0] {
+		v > m.minHeap.float64Heap[0] {
 		heap.Push(&m.minHeap, v)
 	} else {
 		heap.Push(&m.maxHeap, v)
@@ -89,8 +89,8 @@ func (m *MovingMedian) Push(v float64) {
 	if len(m.queue) > m.size {
 		outItem := m.queue[0]
 		m.queue = m.queue[1:len(m.queue)]
-		if !RemoveFromHeap(&m.minHeap, outItem) {
-			RemoveFromHeap(&m.maxHeap, outItem)
+		if !removeFromHeap(&m.minHeap, outItem) {
+			removeFromHeap(&m.maxHeap, outItem)
 		}
 	}
 
@@ -109,12 +109,12 @@ func (m MovingMedian) Median() float64 {
 	}
 
 	if (len(m.queue) % 2) == 0 {
-		return (m.maxHeap.Heap[0] + m.minHeap.Heap[0]) / 2
+		return (m.maxHeap.float64Heap[0] + m.minHeap.float64Heap[0]) / 2
 	}
 
 	if m.maxHeap.Len() > m.minHeap.Len() {
-		return m.maxHeap.Heap[0]
+		return m.maxHeap.float64Heap[0]
 	}
 
-	return m.minHeap.Heap[0]
+	return m.minHeap.float64Heap[0]
 }
