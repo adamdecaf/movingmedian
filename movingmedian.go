@@ -48,14 +48,14 @@ func (h maxFloat64Heap) Less(i, j int) bool { return h.float64Heap[i].f > h.floa
 type MovingMedian struct {
 	idx     int
 	nelts   int
-	queue   []elt
+	queue   []*elt
 	maxHeap maxFloat64Heap
 	minHeap minFloat64Heap
 }
 
 func NewMovingMedian(size int) MovingMedian {
 	m := MovingMedian{
-		queue:   make([]elt, size),
+		queue:   make([]*elt, size),
 		maxHeap: maxFloat64Heap{},
 		minHeap: minFloat64Heap{},
 	}
@@ -68,7 +68,7 @@ func NewMovingMedian(size int) MovingMedian {
 func (m *MovingMedian) Push(v float64) {
 
 	if m.nelts >= len(m.queue) {
-		old := &m.queue[m.idx]
+		old := m.queue[m.idx]
 
 		if len(m.queue) == 1 || old.f > m.minHeap.float64Heap[0].f {
 			heap.Remove(&m.minHeap, old.idx)
@@ -77,8 +77,8 @@ func (m *MovingMedian) Push(v float64) {
 		}
 	}
 
-	m.queue[m.idx] = elt{f: v}
-	e := &m.queue[m.idx]
+	m.queue[m.idx] = &elt{f: v}
+	e := m.queue[m.idx]
 
 	m.nelts++
 	m.idx++
