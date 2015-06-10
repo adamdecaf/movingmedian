@@ -5,6 +5,11 @@ import (
 	"math"
 )
 
+type HeapInterface interface {
+	heap.Interface
+	Data() []float64
+}
+
 type Heap []float64
 
 func (h Heap) Len() int { return len(h) }
@@ -24,39 +29,32 @@ func (h *Heap) Pop() interface{} {
 	return x
 }
 
+func (h Heap) Data() []float64 {
+	return []float64(h)
+}
+
+func RemoveFromHeap(h HeapInterface, x float64) bool {
+	for i, v := range h.Data() {
+		if v == x {
+			heap.Remove(h, i)
+			return true
+		}
+	}
+
+	return false
+}
+
 type MinHeap struct {
 	Heap
 }
 
 func (h MinHeap) Less(i, j int) bool { return h.Heap[i] < h.Heap[j] }
 
-func (h *MinHeap) RemoveValue(x float64) bool {
-	for i, v := range h.Heap {
-		if v == x {
-			heap.Remove(h, i)
-			return true
-		}
-	}
-
-	return false
-}
-
 type MaxHeap struct {
 	Heap
 }
 
 func (h MaxHeap) Less(i, j int) bool { return h.Heap[i] > h.Heap[j] }
-
-func (h *MaxHeap) RemoveValue(x float64) bool {
-	for i, v := range h.Heap {
-		if v == x {
-			heap.Remove(h, i)
-			return true
-		}
-	}
-
-	return false
-}
 
 type MovingMedian struct {
 	size    int
@@ -91,8 +89,8 @@ func (m *MovingMedian) Push(v float64) {
 	if len(m.queue) > m.size {
 		outItem := m.queue[0]
 		m.queue = m.queue[1:len(m.queue)]
-		if !m.minHeap.RemoveValue(outItem) {
-			m.maxHeap.RemoveValue(outItem)
+		if !RemoveFromHeap(&m.minHeap, outItem) {
+			RemoveFromHeap(&m.maxHeap, outItem)
 		}
 	}
 
