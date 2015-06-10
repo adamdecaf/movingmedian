@@ -22,9 +22,24 @@ func TestMedian(t *testing.T) {
 	}
 }
 
-func BenchmarkMovingMedianOptimized(b *testing.B) {
-	var windowSize = int(4e2)
-	data := getData(int(16e4))
+func Benchmark_10values_windowsize1(b *testing.B) {
+	benchmark(b, 10, 1)
+}
+
+func Benchmark_100values_windowsize10(b *testing.B) {
+	benchmark(b, 100, 10)
+}
+
+func Benchmark_10Kvalues_windowsize100(b *testing.B) {
+	benchmark(b, 10000, 100)
+}
+
+func Benchmark_10Kvalues_windowsize1000(b *testing.B) {
+	benchmark(b, 10000, 1000)
+}
+
+func benchmark(b *testing.B, numberOfValues, windowSize int) {
+	data := getData(numberOfValues)
 
 	b.ResetTimer()
 
@@ -33,19 +48,6 @@ func BenchmarkMovingMedianOptimized(b *testing.B) {
 		for _, v := range data {
 			m.Push(v)
 			m.Median()
-		}
-	}
-}
-
-func BenchmarkMovingMedian(b *testing.B) {
-	var windowSize = int(4e2)
-	data := getData(int(16e4))
-
-	b.ResetTimer()
-
-	for j := 0; j < b.N; j++ {
-		for i := range data {
-			median(data, i, windowSize)
 		}
 	}
 }
