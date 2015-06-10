@@ -13,6 +13,13 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 		want       []float64
 	}{
 		{
+			"OneWindowSize",
+			1,
+			[]float64{1, 3, 5, 7, 9, 11},
+			[]float64{1, 3, 5, 7, 9, 11},
+		},
+
+		{
 			"OddWindowSize",
 			3,
 			[]float64{1, 3, 5, 7, 9, 11},
