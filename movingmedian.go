@@ -86,8 +86,6 @@ func (m *MovingMedian) Push(v float64) {
 		} else {
 			heap.Remove(&m.maxHeap, old.idx)
 		}
-
-		m.balanceHeaps()
 	}
 
 	m.queue[m.idx] = elt{f: v}
