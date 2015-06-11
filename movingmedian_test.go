@@ -1,6 +1,7 @@
 package movingmedian
 
 import (
+	"math"
 	"math/rand"
 	"testing"
 )
@@ -15,10 +16,9 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 		{
 			"OneWindowSize",
 			1,
-			[]float64{1, 3, 5, 7, 9, 11},
-			[]float64{1, 3, 5, 7, 9, 11},
+			[]float64{1, 3, 5, 7, 9, 11, math.NaN()},
+			[]float64{1, 3, 5, 7, 9, 11, math.NaN()},
 		},
-
 		{
 			"OddWindowSize",
 			3,
@@ -56,7 +56,7 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 		for i, v := range test.data {
 			m.Push(v)
 			actual := m.Median()
-			if test.want[i] != actual {
+			if test.want[i] != actual && !(math.IsNaN(actual) && math.IsNaN(test.want[i])) {
 				firstElement := 1 + i - test.windowSize
 				if firstElement < 0 {
 					firstElement = 0
