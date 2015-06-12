@@ -33,31 +33,31 @@ func (h *itemHeap) Pop() interface{} {
 	return x
 }
 
-type minFloat64Heap struct {
+type minItemHeap struct {
 	itemHeap
 }
 
-func (h minFloat64Heap) Less(i, j int) bool { return h.itemHeap[i].f < h.itemHeap[j].f }
+func (h minItemHeap) Less(i, j int) bool { return h.itemHeap[i].f < h.itemHeap[j].f }
 
-type maxFloat64Heap struct {
+type maxItemHeap struct {
 	itemHeap
 }
 
-func (h maxFloat64Heap) Less(i, j int) bool { return h.itemHeap[i].f > h.itemHeap[j].f }
+func (h maxItemHeap) Less(i, j int) bool { return h.itemHeap[i].f > h.itemHeap[j].f }
 
 type MovingMedian struct {
 	queueIndex int
 	nitems     int
 	queue      []item
-	maxHeap    maxFloat64Heap
-	minHeap    minFloat64Heap
+	maxHeap    maxItemHeap
+	minHeap    minItemHeap
 }
 
 func NewMovingMedian(size int) MovingMedian {
 	m := MovingMedian{
 		queue:   make([]item, size),
-		maxHeap: maxFloat64Heap{},
-		minHeap: minFloat64Heap{},
+		maxHeap: maxItemHeap{},
+		minHeap: minItemHeap{},
 	}
 
 	heap.Init(&m.maxHeap)
@@ -73,41 +73,50 @@ func (m *MovingMedian) balanceHeaps() {
 		moveItem := heap.Pop(&m.minHeap)
 		heap.Push(&m.maxHeap, moveItem)
 	}
-
 }
 
 func (m *MovingMedian) Push(v float64) {
-
+	item := &m.queue[m.queueIndex]
+	push := true
 	if m.nitems == len(m.queue) {
-		old := &m.queue[m.queueIndex]
-		heapIndex := old.idx
-
-		if heapIndex < m.minHeap.Len() && old == m.minHeap.itemHeap[heapIndex] {
-			heap.Remove(&m.minHeap, heapIndex)
+		heapIndex := item.idx
+		if heapIndex < m.minHeap.Len() && item == m.minHeap.itemHeap[heapIndex] {
+			push = v < m.minHeap.itemHeap[0].f
+			if push {
+				heap.Remove(&m.minHeap, heapIndex)
+			} else {
+				item.f = v
+				heap.Fix(&m.minHeap, heapIndex)
+			}
 		} else {
-			heap.Remove(&m.maxHeap, heapIndex)
+			push = v > m.maxHeap.itemHeap[0].f
+			if push {
+				heap.Remove(&m.maxHeap, heapIndex)
+			} else {
+				item.f = v
+				heap.Fix(&m.maxHeap, heapIndex)
+			}
 		}
 	} else {
 		m.nitems++
 	}
 
-	m.queue[m.queueIndex] = item{f: v}
-	e := &m.queue[m.queueIndex]
-
 	m.queueIndex++
-
 	if m.queueIndex >= len(m.queue) {
 		m.queueIndex = 0
 	}
 
-	if m.minHeap.Len() == 0 ||
-		v > m.minHeap.itemHeap[0].f {
-		heap.Push(&m.minHeap, e)
-	} else {
-		heap.Push(&m.maxHeap, e)
-	}
+	if push {
+		item.f = v
+		if m.minHeap.Len() == 0 ||
+			v > m.minHeap.itemHeap[0].f {
+			heap.Push(&m.minHeap, item)
+		} else {
+			heap.Push(&m.maxHeap, item)
+		}
 
-	m.balanceHeaps()
+		m.balanceHeaps()
+	}
 }
 
 func (m *MovingMedian) Median() float64 {
