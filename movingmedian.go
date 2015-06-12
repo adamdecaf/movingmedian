@@ -78,7 +78,7 @@ func (m *MovingMedian) balanceHeaps() {
 
 func (m *MovingMedian) Push(v float64) {
 
-	if m.nelts >= len(m.queue) {
+	if m.nelts == len(m.queue) {
 		old := &m.queue[m.idx]
 
 		if old.idx < m.minHeap.Len() && old == m.minHeap.float64Heap[old.idx] {
@@ -86,12 +86,13 @@ func (m *MovingMedian) Push(v float64) {
 		} else {
 			heap.Remove(&m.maxHeap, old.idx)
 		}
-	}
+	} else {
+    m.nelts++
+  }
 
 	m.queue[m.idx] = elt{f: v}
 	e := &m.queue[m.idx]
 
-	m.nelts++
 	m.idx++
 
 	if m.idx >= len(m.queue) {
@@ -113,12 +114,7 @@ func (m *MovingMedian) Median() float64 {
 		return math.NaN()
 	}
 
-	wsize := m.nelts
-	if m.nelts > len(m.queue) {
-		wsize = len(m.queue)
-	}
-
-	if (wsize % 2) == 0 {
+	if (m.nelts % 2) == 0 {
 		return (m.maxHeap.float64Heap[0].f + m.minHeap.float64Heap[0].f) / 2
 	}
 
