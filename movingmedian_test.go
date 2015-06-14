@@ -171,11 +171,10 @@ func benchmark(b *testing.B, numberOfValues, windowSize int) {
 }
 
 func getData(rangeSize, windowSize int) []float64 {
-	ceil := (windowSize + 3) / 2
 	var data = make([]float64, rangeSize)
 	var r = rand.New(rand.NewSource(99))
 	for i, _ := range data {
-		data[i] = float64((r.Int() % ceil) * 2)
+		data[i] = r.Float64()
 	}
 
 	return data
