@@ -68,12 +68,14 @@ func NewMovingMedian(size int) MovingMedian {
 func (m *MovingMedian) Push(v float64) {
 	item := &m.queue[m.queueIndex]
 	push := true
+	minHeapLen := m.minHeap.Len()
 	if m.nitems == len(m.queue) {
 		heapIndex := item.idx
-		if heapIndex < m.minHeap.Len() && item == m.minHeap.itemHeap[heapIndex] {
+		if heapIndex < minHeapLen && item == m.minHeap.itemHeap[heapIndex] {
 			push = v < m.minHeap.itemHeap[0].f
 			if push {
 				heap.Remove(&m.minHeap, heapIndex)
+				minHeapLen--
 			} else {
 				item.f = v
 				heap.Fix(&m.minHeap, heapIndex)
@@ -98,16 +100,17 @@ func (m *MovingMedian) Push(v float64) {
 
 	if push {
 		item.f = v
-		if m.minHeap.Len() == 0 ||
-			v > m.minHeap.itemHeap[0].f {
+		if minHeapLen == 0 {
 			heap.Push(&m.minHeap, item)
-			if m.minHeap.Len() > (m.maxHeap.Len() + 1) {
+		} else if v > m.minHeap.itemHeap[0].f {
+			heap.Push(&m.minHeap, item)
+			if minHeapLen > m.maxHeap.Len() {
 				moveItem := heap.Pop(&m.minHeap)
 				heap.Push(&m.maxHeap, moveItem)
 			}
 		} else {
 			heap.Push(&m.maxHeap, item)
-			if m.maxHeap.Len() > (m.minHeap.Len() + 1) {
+			if m.maxHeap.Len() == (minHeapLen + 2) {
 				moveItem := heap.Pop(&m.maxHeap)
 				heap.Push(&m.minHeap, moveItem)
 			}
