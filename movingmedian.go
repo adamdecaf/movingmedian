@@ -2,7 +2,6 @@ package movingmedian
 
 import (
 	"container/heap"
-	"math"
 )
 
 type item struct {
@@ -66,61 +65,77 @@ func NewMovingMedian(size int) MovingMedian {
 }
 
 func (m *MovingMedian) Push(v float64) {
-	item := &m.queue[m.queueIndex]
-	push := true
-	minHeapLen := m.minHeap.Len()
-	if m.nitems == len(m.queue) {
-		heapIndex := item.idx
-		if heapIndex < minHeapLen && item == m.minHeap.itemHeap[heapIndex] {
-			push = v < m.minHeap.itemHeap[0].f
-			if push {
-				heap.Remove(&m.minHeap, heapIndex)
-				minHeapLen--
-			} else {
-				item.f = v
-				heap.Fix(&m.minHeap, heapIndex)
-			}
-		} else {
-			push = v > m.maxHeap.itemHeap[0].f
-			if push {
-				heap.Remove(&m.maxHeap, heapIndex)
-			} else {
-				item.f = v
-				heap.Fix(&m.maxHeap, heapIndex)
-			}
-		}
-	} else {
-		m.nitems++
+	if len(m.queue) == 1 {
+		m.queue[0].f = v
+		return
 	}
 
+	itemPtr := &m.queue[m.queueIndex]
 	m.queueIndex++
 	if m.queueIndex >= len(m.queue) {
 		m.queueIndex = 0
 	}
 
-	if push {
-		item.f = v
-		if minHeapLen == 0 {
-			heap.Push(&m.minHeap, item)
-		} else if v > m.minHeap.itemHeap[0].f {
-			heap.Push(&m.minHeap, item)
-			if minHeapLen > m.maxHeap.Len() {
-				moveItem := heap.Pop(&m.minHeap)
-				heap.Push(&m.maxHeap, moveItem)
+	minHeapLen := m.minHeap.Len()
+	if m.nitems == len(m.queue) {
+		heapIndex := itemPtr.idx
+		if heapIndex < minHeapLen && itemPtr == m.minHeap.itemHeap[heapIndex] {
+			if v >= m.minHeap.itemHeap[0].f {
+				itemPtr.f = v
+				heap.Fix(&m.minHeap, heapIndex)
+				return
 			}
+
+			itemPtr.f = v
+			moveItem := m.maxHeap.itemHeap[0]
+			moveItem.idx = heapIndex
+			m.minHeap.itemHeap[heapIndex] = moveItem
+			m.maxHeap.itemHeap[0] = itemPtr
+
+			heap.Fix(&m.minHeap, heapIndex)
+			heap.Fix(&m.maxHeap, 0)
+			return
 		} else {
-			heap.Push(&m.maxHeap, item)
-			if m.maxHeap.Len() == (minHeapLen + 2) {
-				moveItem := heap.Pop(&m.maxHeap)
-				heap.Push(&m.minHeap, moveItem)
+			if v <= m.maxHeap.itemHeap[0].f {
+				itemPtr.f = v
+				heap.Fix(&m.maxHeap, heapIndex)
+				return
 			}
+
+			itemPtr.f = v
+			moveItem := m.minHeap.itemHeap[0]
+			moveItem.idx = heapIndex
+			m.maxHeap.itemHeap[heapIndex] = moveItem
+			m.minHeap.itemHeap[0] = itemPtr
+
+			heap.Fix(&m.maxHeap, heapIndex)
+			heap.Fix(&m.minHeap, 0)
+			return
+		}
+	}
+
+	m.nitems++
+	itemPtr.f = v
+	if minHeapLen == 0 {
+		heap.Push(&m.minHeap, itemPtr)
+	} else if v > m.minHeap.itemHeap[0].f {
+		heap.Push(&m.minHeap, itemPtr)
+		if minHeapLen > m.maxHeap.Len() {
+			moveItem := heap.Pop(&m.minHeap)
+			heap.Push(&m.maxHeap, moveItem)
+		}
+	} else {
+		heap.Push(&m.maxHeap, itemPtr)
+		if m.maxHeap.Len() == (minHeapLen + 2) {
+			moveItem := heap.Pop(&m.maxHeap)
+			heap.Push(&m.minHeap, moveItem)
 		}
 	}
 }
 
 func (m *MovingMedian) Median() float64 {
-	if len(m.queue) == 0 {
-		return math.NaN()
+	if len(m.queue) == 1 {
+		return m.queue[0].f
 	}
 
 	if (m.nitems % 2) == 0 {
