@@ -38,10 +38,42 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 			[]float64{19, 18, 17, 16, 14, 12},
 		},
 		{
+			"DecreasingIncreasingValues",
+			4,
+			[]float64{21, 19, 17, 15, 13, 11, 13, 15, 17, 19},
+			[]float64{21, 20, 19, 18, 16, 14, 13, 13, 14, 16},
+		},
+		{
+			"IncreasingDecreasingValues",
+			4,
+			[]float64{11, 13, 15, 17, 19, 21, 19, 17, 15, 13},
+			[]float64{11, 12, 13, 14, 16, 18, 19, 19, 18, 16},
+		},
+		{
+
+			"ZigZag",
+			4,
+			[]float64{21, 23, 17, 27, 13, 31, 9, 35, 5, 39, 1},
+			[]float64{21, 22, 21, 22, 20, 22, 20, 22, 20, 22, 20},
+		},
+		{
+
+			"NewValuesInBetween",
+			4,
+			[]float64{21, 21, 19, 19, 21, 21, 19, 19, 19, 19},
+			[]float64{21, 21, 21, 20, 20, 20, 20, 20, 19, 19},
+		},
+		{
 			"SameNumberInBothHeaps3Times",
 			4,
 			[]float64{11, 13, 13, 13, 25, 27, 29, 31},
 			[]float64{11, 12, 13, 13, 13, 19, 26, 28},
+		},
+		{
+			"SameNumberInBothHeaps3TimesDecreasing",
+			4,
+			[]float64{31, 29, 29, 29, 17, 15, 13, 11},
+			[]float64{31, 30, 29, 29, 29, 23, 16, 14},
 		},
 		{
 			"SameNumberInBothHeaps4Times",
