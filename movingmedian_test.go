@@ -1,13 +1,14 @@
 package movingmedian
 
 import (
+	"github.com/wangjohn/quickselect"
 	"log"
 	"math"
 	"math/rand"
 	"testing"
 )
 
-func TestSameNumberInBothHeaps(t *testing.T) {
+func TestUnit(t *testing.T) {
 	tests := []struct {
 		name       string
 		windowSize int
@@ -106,6 +107,39 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 	}
 }
 
+func TestRandom(t *testing.T) {
+	rangeSize := 100
+	for windowSize := 1; windowSize < 5; windowSize++ {
+		data := getData(rangeSize, windowSize)
+		intData := make([]int, rangeSize)
+		for i, v := range data {
+			intData[i] = int(v)
+		}
+
+		log.Println("test name random test window size", windowSize)
+		m := NewMovingMedian(windowSize)
+		for i, v := range data {
+			want := median(data, i, windowSize)
+
+			m.Push(v)
+			actual := m.Median()
+			if want != actual {
+				firstElement := 1 + i - windowSize
+				if firstElement < 0 {
+					firstElement = 0
+				}
+
+				t.Errorf("failed on test random window size %d index %d the median of %d is %f and not %f",
+					windowSize,
+					i,
+					intData[firstElement:1+i],
+					want,
+					actual)
+			}
+		}
+	}
+}
+
 func Benchmark_10values_windowsize1(b *testing.B) {
 	benchmark(b, 10, 1)
 }
@@ -123,7 +157,7 @@ func Benchmark_10Kvalues_windowsize1000(b *testing.B) {
 }
 
 func benchmark(b *testing.B, numberOfValues, windowSize int) {
-	data := getData(numberOfValues)
+	data := getData(numberOfValues, windowSize)
 
 	b.ResetTimer()
 
@@ -136,12 +170,51 @@ func benchmark(b *testing.B, numberOfValues, windowSize int) {
 	}
 }
 
-func getData(rangeSize int) []float64 {
+func getData(rangeSize, windowSize int) []float64 {
+	ceil := (windowSize + 3) / 2
 	var data = make([]float64, rangeSize)
 	var r = rand.New(rand.NewSource(99))
 	for i, _ := range data {
-		data[i] = r.Float64()
+		data[i] = float64((r.Int() % ceil) * 2)
 	}
 
 	return data
+}
+
+func median(data []float64, i, windowSize int) float64 {
+	min := 1 + i - windowSize
+	if min < 0 {
+		min = 0
+	}
+
+	window := make([]float64, 1+i-min)
+	copy(window, data[min:i+1])
+	return percentile(window, 50, true)
+}
+
+func percentile(data []float64, percent float64, interpolate bool) float64 {
+	if len(data) == 0 || percent < 0 || percent > 100 {
+		return math.NaN()
+	}
+	if len(data) == 1 {
+		return data[0]
+	}
+
+	k := (float64(len(data)-1) * percent) / 100
+	length := int(math.Ceil(k)) + 1
+	quickselect.Float64QuickSelect(data, length)
+	top, secondTop := math.Inf(-1), math.Inf(-1)
+	for _, val := range data[0:length] {
+		if val > top {
+			secondTop = top
+			top = val
+		} else if val > secondTop {
+			secondTop = val
+		}
+	}
+	remainder := k - float64(int(k))
+	if remainder == 0 || !interpolate {
+		return top
+	}
+	return (top * remainder) + (secondTop * (1 - remainder))
 }
