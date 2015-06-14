@@ -1,6 +1,7 @@
 package movingmedian
 
 import (
+	"log"
 	"math"
 	"math/rand"
 	"testing"
@@ -84,6 +85,7 @@ func TestSameNumberInBothHeaps(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		log.Println("test name", test.name)
 		m := NewMovingMedian(test.windowSize)
 		for i, v := range test.data {
 			m.Push(v)
