@@ -3,8 +3,8 @@ package movingmedian
 import "container/heap"
 
 type item struct {
-	f   float64
-	idx int
+	f         float64
+	heapIndex int
 }
 
 type itemHeap []*item
@@ -12,13 +12,13 @@ type itemHeap []*item
 func (h itemHeap) Len() int { return len(h) }
 func (h itemHeap) Swap(i, j int) {
 	h[i], h[j] = h[j], h[i]
-	h[i].idx = i
-	h[j].idx = j
+	h[i].heapIndex = i
+	h[j].heapIndex = j
 }
 
 func (h *itemHeap) Push(x interface{}) {
 	e := x.(*item)
-	e.idx = len(*h)
+	e.heapIndex = len(*h)
 	*h = append(*h, e)
 }
 
@@ -76,39 +76,38 @@ func (m *MovingMedian) Push(v float64) {
 
 	minHeapLen := m.minHeap.Len()
 	if m.nitems == len(m.queue) {
-		heapIndex := itemPtr.idx
-		if heapIndex < minHeapLen && itemPtr == m.minHeap.itemHeap[heapIndex] {
+		if itemPtr.heapIndex < minHeapLen && itemPtr == m.minHeap.itemHeap[itemPtr.heapIndex] {
 			if v >= m.maxHeap.itemHeap[0].f {
 				itemPtr.f = v
-				heap.Fix(&m.minHeap, heapIndex)
+				heap.Fix(&m.minHeap, itemPtr.heapIndex)
 				return
 			}
 
 			moveItem := m.maxHeap.itemHeap[0]
-			moveItem.idx = heapIndex
-			m.minHeap.itemHeap[heapIndex] = moveItem
+			moveItem.heapIndex = itemPtr.heapIndex
+			m.minHeap.itemHeap[itemPtr.heapIndex] = moveItem
 			itemPtr.f = v
-			itemPtr.idx = 0
 			m.maxHeap.itemHeap[0] = itemPtr
 
-			heap.Fix(&m.minHeap, heapIndex)
+			heap.Fix(&m.minHeap, itemPtr.heapIndex)
+			itemPtr.heapIndex = 0
 			heap.Fix(&m.maxHeap, 0)
 			return
 		} else {
 			if v <= m.minHeap.itemHeap[0].f {
 				itemPtr.f = v
-				heap.Fix(&m.maxHeap, heapIndex)
+				heap.Fix(&m.maxHeap, itemPtr.heapIndex)
 				return
 			}
 
 			moveItem := m.minHeap.itemHeap[0]
-			moveItem.idx = heapIndex
-			m.maxHeap.itemHeap[heapIndex] = moveItem
+			moveItem.heapIndex = itemPtr.heapIndex
+			m.maxHeap.itemHeap[itemPtr.heapIndex] = moveItem
 			itemPtr.f = v
-			itemPtr.idx = 0
 			m.minHeap.itemHeap[0] = itemPtr
 
-			heap.Fix(&m.maxHeap, heapIndex)
+			heap.Fix(&m.maxHeap, itemPtr.heapIndex)
+			itemPtr.heapIndex = 0
 			heap.Fix(&m.minHeap, 0)
 			return
 		}
