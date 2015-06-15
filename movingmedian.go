@@ -138,7 +138,7 @@ func (m *MovingMedian) Median() float64 {
 		return m.queue[0].f
 	}
 
-	if (m.nitems % 2) == 0 {
+	if m.maxHeap.Len() == m.minHeap.Len() {
 		return (m.maxHeap.itemHeap[0].f + m.minHeap.itemHeap[0].f) / 2
 	}
 
