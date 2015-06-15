@@ -84,13 +84,7 @@ func (m *MovingMedian) Push(v float64) {
 				return
 			}
 
-			moveItem := m.maxHeap.itemHeap[0]
-			moveItem.heapIndex = itemPtr.heapIndex
-			m.minHeap.itemHeap[itemPtr.heapIndex] = moveItem
-			m.maxHeap.itemHeap[0] = itemPtr
-			heap.Fix(&m.minHeap, itemPtr.heapIndex)
-			itemPtr.heapIndex = 0
-			heap.Fix(&m.maxHeap, 0)
+			rotate(&m.maxHeap, &m.minHeap, m.maxHeap.itemHeap, m.minHeap.itemHeap, itemPtr)
 			return
 		}
 
@@ -99,13 +93,7 @@ func (m *MovingMedian) Push(v float64) {
 			return
 		}
 
-		moveItem := m.minHeap.itemHeap[0]
-		moveItem.heapIndex = itemPtr.heapIndex
-		m.maxHeap.itemHeap[itemPtr.heapIndex] = moveItem
-		m.minHeap.itemHeap[0] = itemPtr
-		heap.Fix(&m.maxHeap, itemPtr.heapIndex)
-		itemPtr.heapIndex = 0
-		heap.Fix(&m.minHeap, 0)
+		rotate(&m.minHeap, &m.maxHeap, m.minHeap.itemHeap, m.maxHeap.itemHeap, itemPtr)
 		return
 	}
 
@@ -125,6 +113,16 @@ func rebalance(heapA, heapB heap.Interface) {
 		moveItem := heap.Pop(heapA)
 		heap.Push(heapB, moveItem)
 	}
+}
+
+func rotate(heapA, heapB heap.Interface, itemHeapA, itemHeapB itemHeap, itemPtr *item) {
+	moveItem := itemHeapA[0]
+	moveItem.heapIndex = itemPtr.heapIndex
+	itemHeapB[itemPtr.heapIndex] = moveItem
+	itemHeapA[0] = itemPtr
+	heap.Fix(heapB, itemPtr.heapIndex)
+	itemPtr.heapIndex = 0
+	heap.Fix(heapA, 0)
 }
 
 func (m *MovingMedian) Median() float64 {
