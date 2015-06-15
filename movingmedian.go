@@ -1,8 +1,6 @@
 package movingmedian
 
-import (
-	"container/heap"
-)
+import "container/heap"
 
 type item struct {
 	f   float64
@@ -80,32 +78,34 @@ func (m *MovingMedian) Push(v float64) {
 	if m.nitems == len(m.queue) {
 		heapIndex := itemPtr.idx
 		if heapIndex < minHeapLen && itemPtr == m.minHeap.itemHeap[heapIndex] {
-			if v >= m.minHeap.itemHeap[0].f {
+			if v >= m.maxHeap.itemHeap[0].f {
 				itemPtr.f = v
 				heap.Fix(&m.minHeap, heapIndex)
 				return
 			}
 
-			itemPtr.f = v
 			moveItem := m.maxHeap.itemHeap[0]
 			moveItem.idx = heapIndex
 			m.minHeap.itemHeap[heapIndex] = moveItem
+			itemPtr.f = v
+			itemPtr.idx = 0
 			m.maxHeap.itemHeap[0] = itemPtr
 
 			heap.Fix(&m.minHeap, heapIndex)
 			heap.Fix(&m.maxHeap, 0)
 			return
 		} else {
-			if v <= m.maxHeap.itemHeap[0].f {
+			if v <= m.minHeap.itemHeap[0].f {
 				itemPtr.f = v
 				heap.Fix(&m.maxHeap, heapIndex)
 				return
 			}
 
-			itemPtr.f = v
 			moveItem := m.minHeap.itemHeap[0]
 			moveItem.idx = heapIndex
 			m.maxHeap.itemHeap[heapIndex] = moveItem
+			itemPtr.f = v
+			itemPtr.idx = 0
 			m.minHeap.itemHeap[0] = itemPtr
 
 			heap.Fix(&m.maxHeap, heapIndex)
@@ -138,7 +138,7 @@ func (m *MovingMedian) Median() float64 {
 		return m.queue[0].f
 	}
 
-	if (m.nitems % 2) == 0 {
+	if m.maxHeap.Len() == m.minHeap.Len() {
 		return (m.maxHeap.itemHeap[0].f + m.minHeap.itemHeap[0].f) / 2
 	}
 
