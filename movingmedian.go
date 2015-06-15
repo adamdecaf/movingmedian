@@ -74,11 +74,12 @@ func (m *MovingMedian) Push(v float64) {
 		m.queueIndex = 0
 	}
 
-	minHeapLen := m.minHeap.Len()
 	if m.nitems == len(m.queue) {
-		if itemPtr.heapIndex < minHeapLen && itemPtr == m.minHeap.itemHeap[itemPtr.heapIndex] {
-			if v >= m.maxHeap.itemHeap[0].f {
-				itemPtr.f = v
+		minAbove := m.minHeap.itemHeap[0].f
+		maxBelow := m.maxHeap.itemHeap[0].f
+		itemPtr.f = v
+		if itemPtr.heapIndex < m.minHeap.Len() && itemPtr == m.minHeap.itemHeap[itemPtr.heapIndex] {
+			if v >= maxBelow {
 				heap.Fix(&m.minHeap, itemPtr.heapIndex)
 				return
 			}
@@ -86,35 +87,31 @@ func (m *MovingMedian) Push(v float64) {
 			moveItem := m.maxHeap.itemHeap[0]
 			moveItem.heapIndex = itemPtr.heapIndex
 			m.minHeap.itemHeap[itemPtr.heapIndex] = moveItem
-			itemPtr.f = v
 			m.maxHeap.itemHeap[0] = itemPtr
-
 			heap.Fix(&m.minHeap, itemPtr.heapIndex)
 			itemPtr.heapIndex = 0
 			heap.Fix(&m.maxHeap, 0)
 			return
-		} else {
-			if v <= m.minHeap.itemHeap[0].f {
-				itemPtr.f = v
-				heap.Fix(&m.maxHeap, itemPtr.heapIndex)
-				return
-			}
+		}
 
-			moveItem := m.minHeap.itemHeap[0]
-			moveItem.heapIndex = itemPtr.heapIndex
-			m.maxHeap.itemHeap[itemPtr.heapIndex] = moveItem
-			itemPtr.f = v
-			m.minHeap.itemHeap[0] = itemPtr
-
+		if v <= minAbove {
 			heap.Fix(&m.maxHeap, itemPtr.heapIndex)
-			itemPtr.heapIndex = 0
-			heap.Fix(&m.minHeap, 0)
 			return
 		}
+
+		moveItem := m.minHeap.itemHeap[0]
+		moveItem.heapIndex = itemPtr.heapIndex
+		m.maxHeap.itemHeap[itemPtr.heapIndex] = moveItem
+		m.minHeap.itemHeap[0] = itemPtr
+		heap.Fix(&m.maxHeap, itemPtr.heapIndex)
+		itemPtr.heapIndex = 0
+		heap.Fix(&m.minHeap, 0)
+		return
 	}
 
 	m.nitems++
 	itemPtr.f = v
+	minHeapLen := m.minHeap.Len()
 	if minHeapLen == 0 {
 		heap.Push(&m.minHeap, itemPtr)
 	} else if v > m.minHeap.itemHeap[0].f {
