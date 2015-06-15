@@ -84,10 +84,11 @@ func (m *MovingMedian) Push(v float64) {
 				return
 			}
 
-			itemPtr.f = v
 			moveItem := m.maxHeap.itemHeap[0]
 			moveItem.idx = heapIndex
 			m.minHeap.itemHeap[heapIndex] = moveItem
+			itemPtr.f = v
+			itemPtr.idx = 0
 			m.maxHeap.itemHeap[0] = itemPtr
 
 			heap.Fix(&m.minHeap, heapIndex)
@@ -100,10 +101,11 @@ func (m *MovingMedian) Push(v float64) {
 				return
 			}
 
-			itemPtr.f = v
 			moveItem := m.minHeap.itemHeap[0]
 			moveItem.idx = heapIndex
 			m.maxHeap.itemHeap[heapIndex] = moveItem
+			itemPtr.f = v
+			itemPtr.idx = 0
 			m.minHeap.itemHeap[0] = itemPtr
 
 			heap.Fix(&m.maxHeap, heapIndex)
