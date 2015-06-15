@@ -174,7 +174,7 @@ func getData(rangeSize, windowSize int) []float64 {
 	var data = make([]float64, rangeSize)
 	var r = rand.New(rand.NewSource(99))
 	for i, _ := range data {
-		data[i] = r.Float64()
+		data[i] = math.Floor(1000 * r.Float64())
 	}
 
 	return data
