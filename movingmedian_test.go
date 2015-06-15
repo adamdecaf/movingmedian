@@ -1,7 +1,6 @@
 package movingmedian
 
 import (
-	"log"
 	"math"
 	"math/rand"
 	"sort"
@@ -86,7 +85,7 @@ func TestUnit(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		log.Println("test name", test.name)
+		t.Log("test name", test.name)
 		m := NewMovingMedian(test.windowSize)
 		for i, v := range test.data {
 			m.Push(v)
@@ -116,7 +115,7 @@ func TestRandom(t *testing.T) {
 			intData[i] = int(v)
 		}
 
-		log.Println("test name random test window size", windowSize)
+		t.Log("test name random test window size", windowSize)
 		m := NewMovingMedian(windowSize)
 		for i, v := range data {
 			want := median(data, i, windowSize)
