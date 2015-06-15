@@ -78,7 +78,7 @@ func (m *MovingMedian) Push(v float64) {
 	if m.nitems == len(m.queue) {
 		heapIndex := itemPtr.idx
 		if heapIndex < minHeapLen && itemPtr == m.minHeap.itemHeap[heapIndex] {
-			if v >= m.minHeap.itemHeap[0].f || v >= m.maxHeap.itemHeap[0].f {
+			if v >= m.maxHeap.itemHeap[0].f {
 				itemPtr.f = v
 				heap.Fix(&m.minHeap, heapIndex)
 				return
@@ -95,7 +95,7 @@ func (m *MovingMedian) Push(v float64) {
 			heap.Fix(&m.maxHeap, 0)
 			return
 		} else {
-			if v <= m.maxHeap.itemHeap[0].f || v <= m.minHeap.itemHeap[0].f {
+			if v <= m.minHeap.itemHeap[0].f {
 				itemPtr.f = v
 				heap.Fix(&m.maxHeap, heapIndex)
 				return
