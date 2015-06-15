@@ -1,8 +1,6 @@
 package movingmedian
 
-import (
-	"container/heap"
-)
+import "container/heap"
 
 type item struct {
 	f   float64
