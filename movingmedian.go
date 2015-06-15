@@ -111,21 +111,19 @@ func (m *MovingMedian) Push(v float64) {
 
 	m.nitems++
 	itemPtr.f = v
-	minHeapLen := m.minHeap.Len()
-	if minHeapLen == 0 {
+	if m.minHeap.Len() == 0 || v > m.minHeap.itemHeap[0].f {
 		heap.Push(&m.minHeap, itemPtr)
-	} else if v > m.minHeap.itemHeap[0].f {
-		heap.Push(&m.minHeap, itemPtr)
-		if minHeapLen > m.maxHeap.Len() {
-			moveItem := heap.Pop(&m.minHeap)
-			heap.Push(&m.maxHeap, moveItem)
-		}
+		rebalance(&m.minHeap, &m.maxHeap)
 	} else {
 		heap.Push(&m.maxHeap, itemPtr)
-		if m.maxHeap.Len() == (minHeapLen + 2) {
-			moveItem := heap.Pop(&m.maxHeap)
-			heap.Push(&m.minHeap, moveItem)
-		}
+		rebalance(&m.maxHeap, &m.minHeap)
+	}
+}
+
+func rebalance(heapA, heapB heap.Interface) {
+	if heapA.Len() == (heapB.Len() + 2) {
+		moveItem := heap.Pop(heapA)
+		heap.Push(heapB, moveItem)
 	}
 }
 
