@@ -108,8 +108,8 @@ func TestUnit(t *testing.T) {
 }
 
 func TestRandom(t *testing.T) {
-	rangeSize := 10000
-	for windowSize := 1; windowSize < 100; windowSize++ {
+	rangeSize := 1000
+	for windowSize := 1; windowSize < 50; windowSize++ {
 		data := getData(rangeSize, windowSize)
 		intData := make([]int, rangeSize)
 		for i, v := range data {
