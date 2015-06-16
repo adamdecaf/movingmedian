@@ -1,3 +1,4 @@
+// Package movingmedian computes the median of a windowed stream of data.
 package movingmedian
 
 import "container/heap"
@@ -64,7 +65,7 @@ func NewMovingMedian(size int) MovingMedian {
 	return m
 }
 
-// Push adds an element to the stream, removing old data which has expired from the window.
+// Push adds an element to the stream, removing old data which has expired from the window.  It runs in O(log windowSize).
 func (m *MovingMedian) Push(v float64) {
 	if len(m.queue) == 1 {
 		m.queue[0].f = v
