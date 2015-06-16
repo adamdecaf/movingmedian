@@ -42,6 +42,7 @@ type maxItemHeap struct {
 
 func (h maxItemHeap) Less(i, j int) bool { return h.itemHeap[i].f > h.itemHeap[j].f }
 
+// MovingMedian computes the moving median of a windowed stream of numbers.
 type MovingMedian struct {
 	queueIndex int
 	nitems     int
@@ -50,6 +51,7 @@ type MovingMedian struct {
 	minHeap    minItemHeap
 }
 
+// NewMovingMedian returns a MovingMedian with the given window size.
 func NewMovingMedian(size int) MovingMedian {
 	m := MovingMedian{
 		queue:   make([]item, size),
@@ -62,6 +64,7 @@ func NewMovingMedian(size int) MovingMedian {
 	return m
 }
 
+// Push adds an element to the stream, removing old data which has expired from the window.
 func (m *MovingMedian) Push(v float64) {
 	if len(m.queue) == 1 {
 		m.queue[0].f = v
@@ -125,6 +128,7 @@ func rotate(heapA, heapB heap.Interface, itemHeapA, itemHeapB itemHeap, itemPtr 
 	heap.Fix(heapA, 0)
 }
 
+// Median returns the current value of the median from the window.
 func (m *MovingMedian) Median() float64 {
 	if len(m.queue) == 1 {
 		return m.queue[0].f
