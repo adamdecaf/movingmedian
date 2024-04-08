@@ -7,6 +7,20 @@ import (
 	"testing"
 )
 
+func TestEmpty(t *testing.T) {
+	m := NewMovingMedian(0)
+	got := m.Median()
+	if int(got) != 0 {
+		t.Fatalf("unexpcted %v", got)
+	}
+
+	m = NewMovingMedian(1)
+	got = m.Median()
+	if int(got) != 0 {
+		t.Fatalf("unexpcted %v", got)
+	}
+}
+
 func TestUnit(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -14,6 +28,12 @@ func TestUnit(t *testing.T) {
 		data       []float64
 		want       []float64
 	}{
+		{
+			"Empty",
+			1,
+			[]float64{},
+			[]float64{},
+		},
 		{
 			"OneWindowSize",
 			1,

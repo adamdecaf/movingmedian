@@ -1,7 +1,9 @@
 // Package movingmedian computes the median of a windowed stream of data.
 package movingmedian
 
-import "container/heap"
+import (
+	"container/heap"
+)
 
 type item struct {
 	f         float64
@@ -135,11 +137,17 @@ func (m *MovingMedian) Median() float64 {
 		return m.queue[0].f
 	}
 
-	if m.maxHeap.Len() == m.minHeap.Len() {
+	minLen := m.minHeap.Len()
+	maxLen := m.maxHeap.Len()
+
+	if maxLen == minLen {
+		if maxLen == 0 {
+			return 0.0
+		}
 		return (m.maxHeap.itemHeap[0].f + m.minHeap.itemHeap[0].f) / 2
 	}
 
-	if m.maxHeap.Len() > m.minHeap.Len() {
+	if maxLen > minLen {
 		return m.maxHeap.itemHeap[0].f
 	}
 
