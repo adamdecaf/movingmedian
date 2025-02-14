@@ -58,10 +58,9 @@ type MovingMedian struct {
 func NewMovingMedian(size int) MovingMedian {
 	m := MovingMedian{
 		queue:   make([]item, size),
-		maxHeap: maxItemHeap{},
-		minHeap: minItemHeap{},
+		maxHeap: maxItemHeap{make([]*item, 0, size/2+1)}, // Pre-allocate with capacity
+		minHeap: minItemHeap{make([]*item, 0, size/2+1)},
 	}
-
 	heap.Init(&m.maxHeap)
 	heap.Init(&m.minHeap)
 	return m
