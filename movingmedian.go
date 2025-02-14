@@ -3,6 +3,7 @@ package movingmedian
 
 import (
 	"container/heap"
+	"fmt"
 )
 
 type item struct {
@@ -20,7 +21,10 @@ func (h itemHeap) Swap(i, j int) {
 }
 
 func (h *itemHeap) Push(x interface{}) {
-	e := x.(*item)
+	e, ok := x.(*item)
+	if !ok {
+		panic(fmt.Sprintf("%T is not an *item", x)) //nolint:forbidigo
+	}
 	e.heapIndex = len(*h)
 	*h = append(*h, e)
 }
@@ -126,13 +130,6 @@ func (m *MovingMedian) Push(v float64) {
 		return
 	}
 	rotate(&m.minHeap, &m.maxHeap, m.minHeap.itemHeap, m.maxHeap.itemHeap, itemPtr)
-}
-
-func rebalance(heapA, heapB heap.Interface) {
-	if heapA.Len() == (heapB.Len() + 2) {
-		moveItem := heap.Pop(heapA)
-		heap.Push(heapB, moveItem)
-	}
 }
 
 func rotate(heapA, heapB heap.Interface, itemHeapA, itemHeapB itemHeap, itemPtr *item) {
