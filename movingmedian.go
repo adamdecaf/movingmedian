@@ -53,7 +53,7 @@ func (m *MovingMedian) Push(v float64) {
 			m.sorted = m.sorted[:m.count-1]
 		} else {
 			// Should never happen.
-			panic("old element not found in sorted slice")
+			panic("old element not found in sorted slice") //nolint:forbidigo
 		}
 
 		// Insert new value v into the sorted slice.
