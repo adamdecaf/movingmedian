@@ -6,7 +6,7 @@ movingmedian
 Description
 -----------
 
-Package movingmedian computes the median of a windowed stream of data.
+Package movingmedian computes the median of a windowed stream of data. This library is not thread-safe.
 
 Installation
 ------------
