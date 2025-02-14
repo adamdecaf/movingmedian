@@ -1,3 +1,3 @@
-module github.com/JaderDias/movingmedian
+module github.com/adamdecaf/movingmedian
 
 go 1.22.2
