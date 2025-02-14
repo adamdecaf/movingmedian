@@ -68,49 +68,64 @@ func NewMovingMedian(size int) MovingMedian {
 
 // Push adds an element to the stream, removing old data which has expired from the window.  It runs in O(log windowSize).
 func (m *MovingMedian) Push(v float64) {
+	// Special case optimization for size 1
 	if len(m.queue) == 1 {
 		m.queue[0].f = v
 		return
 	}
 
+	// Use pointer arithmetic for queue management
 	itemPtr := &m.queue[m.queueIndex]
 	m.queueIndex++
 	if m.queueIndex >= len(m.queue) {
 		m.queueIndex = 0
 	}
 
-	if m.nitems == len(m.queue) {
-		minAbove := m.minHeap.itemHeap[0].f
-		maxBelow := m.maxHeap.itemHeap[0].f
-		itemPtr.f = v
-		if itemPtr.heapIndex < m.minHeap.Len() && itemPtr == m.minHeap.itemHeap[itemPtr.heapIndex] {
-			if v >= maxBelow {
-				heap.Fix(&m.minHeap, itemPtr.heapIndex)
-				return
+	// Update value
+	itemPtr.f = v
+
+	// Fast path for initial window filling
+	if m.nitems < len(m.queue) {
+		m.nitems++
+
+		// Simple balancing for initial fill
+		if m.minHeap.Len() == 0 || v > m.minHeap.itemHeap[0].f {
+			heap.Push(&m.minHeap, itemPtr)
+			if m.minHeap.Len() > m.maxHeap.Len()+1 {
+				moveItem := heap.Pop(&m.minHeap)
+				heap.Push(&m.maxHeap, moveItem)
 			}
-
-			rotate(&m.maxHeap, &m.minHeap, m.maxHeap.itemHeap, m.minHeap.itemHeap, itemPtr)
 			return
 		}
 
-		if v <= minAbove {
-			heap.Fix(&m.maxHeap, itemPtr.heapIndex)
-			return
+		heap.Push(&m.maxHeap, itemPtr)
+		if m.maxHeap.Len() > m.minHeap.Len()+1 {
+			moveItem := heap.Pop(&m.maxHeap)
+			heap.Push(&m.minHeap, moveItem)
 		}
-
-		rotate(&m.minHeap, &m.maxHeap, m.minHeap.itemHeap, m.maxHeap.itemHeap, itemPtr)
 		return
 	}
 
-	m.nitems++
-	itemPtr.f = v
-	if m.minHeap.Len() == 0 || v > m.minHeap.itemHeap[0].f {
-		heap.Push(&m.minHeap, itemPtr)
-		rebalance(&m.minHeap, &m.maxHeap)
-	} else {
-		heap.Push(&m.maxHeap, itemPtr)
-		rebalance(&m.maxHeap, &m.minHeap)
+	// Main path for full window updates
+	minAbove := m.minHeap.itemHeap[0].f
+	maxBelow := m.maxHeap.itemHeap[0].f
+
+	// Check if item is in min heap
+	if itemPtr.heapIndex < m.minHeap.Len() && itemPtr == m.minHeap.itemHeap[itemPtr.heapIndex] {
+		if v >= maxBelow {
+			heap.Fix(&m.minHeap, itemPtr.heapIndex)
+			return
+		}
+		rotate(&m.maxHeap, &m.minHeap, m.maxHeap.itemHeap, m.minHeap.itemHeap, itemPtr)
+		return
 	}
+
+	// Item must be in max heap
+	if v <= minAbove {
+		heap.Fix(&m.maxHeap, itemPtr.heapIndex)
+		return
+	}
+	rotate(&m.minHeap, &m.maxHeap, m.minHeap.itemHeap, m.maxHeap.itemHeap, itemPtr)
 }
 
 func rebalance(heapA, heapB heap.Interface) {
